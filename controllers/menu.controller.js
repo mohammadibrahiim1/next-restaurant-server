@@ -11,15 +11,19 @@ const getMenu = async (req, res) => {
   res.send(response);
 };
 const getMenuByCategory = async (req, res) => {
-  const { name } = req.query;
+  const { slug } = req.query;
   try {
-    const response = await Menu.find({ name });
+    const response = await Menu.find({ slug });
     console.log(response);
-    res.status(200).send(response);
+    res.status(200).send({
+      status: "success",
+      results: response.length,
+      response,
+    });
   } catch (error) {
     res
       .status(500)
-      .send({ error: "An error occurred while fetching the data." });
+      .send({ error: "An error occurred while fetching the data.", error });
   }
 };
 
