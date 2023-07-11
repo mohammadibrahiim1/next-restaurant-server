@@ -15,11 +15,12 @@ const getMenuByCategory = async (req, res) => {
   try {
     const response = await Menu.find({ slug });
     console.log(response);
-    res.status(200).send({
-      status: "success",
-      results: response.length,
-      response,
-    });
+    res.send(response );
+    // res.status(200).send({
+    //   status: "success",
+    //   results: response.length,
+    //   response,
+    // });
   } catch (error) {
     res
       .status(500)
