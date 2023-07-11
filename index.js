@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const router = require("./routes/category");
 const menuRouter = require("./routes/menu");
+const popularItemsRouter = require("./routes/popularItems");
 const app = express();
 // const categoryHandler = require("./routes/category");
 require("dotenv").config();
@@ -25,6 +26,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1", router);
 app.use("/api/v1", menuRouter);
+app.use("/api/v1", popularItemsRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
