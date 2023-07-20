@@ -6,6 +6,7 @@ const menuRouter = require("./routes/menu");
 const popularItemsRouter = require("./routes/popularItems");
 const offerItemsRouter = require("./routes/offerItems");
 const cartRouter = require("./routes/cart");
+const categoryRouter = require("./routes/category");
 const app = express();
 // const categoryHandler = require("./routes/category");
 require("dotenv").config();
@@ -27,6 +28,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/v1", router);
+app.use("/api/v1", categoryRouter);
 app.use("/api/v1", menuRouter);
 app.use("/api/v1", popularItemsRouter);
 app.use("/api/v1", offerItemsRouter);

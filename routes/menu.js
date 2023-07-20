@@ -7,7 +7,7 @@ const router = express.Router();
 
 router.post("/menu", menuController.createMenu);
 router.get("/allMenu", menuController.getMenu);
-router.get("/menu", menuController.getMenuByCategory);
+// router.get("/menu", menuController.getMenuByCategory);
 // router.get("/categories", categoryController.getCategories);
 // router.put("/categories", categoryController.updateCategory);
 module.exports = router;
