@@ -7,6 +7,7 @@ const popularItemsRouter = require("./routes/popularItems");
 const offerItemsRouter = require("./routes/offerItems");
 const cartRouter = require("./routes/cart");
 const categoryRouter = require("./routes/category");
+const branchRouter = require("./routes/branch");
 const app = express();
 // const categoryHandler = require("./routes/category");
 require("dotenv").config();
@@ -33,6 +34,7 @@ app.use("/api/v1", menuRouter);
 app.use("/api/v1", popularItemsRouter);
 app.use("/api/v1", offerItemsRouter);
 app.use("/api/v1", cartRouter);
+app.use("/api/v1", branchRouter);
 
 app.listen(port, () => {
   console.log(`Server is running on ${port}`);
