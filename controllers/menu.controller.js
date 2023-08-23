@@ -21,8 +21,8 @@ const getMenu = async (req, res) => {
       //     },
       //   ];
       // }
-      const filterData = await Menu.find({ slug });
-      return res.send(filterData); 
+      const filterData = await Menu.find({ slug }); 
+      return res.send(filterData);     
     }
   } catch (error) {
     console.log(error);
