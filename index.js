@@ -1,44 +1,43 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const passport = require("./passport");
 const cors = require("cors");
 const router = require("./routes/category");
 const menuRouter = require("./routes/menu");
 const popularItemsRouter = require("./routes/popularItems");
 const offerItemsRouter = require("./routes/offerItems");
 const cartRouter = require("./routes/cart");
+const createUserRouter = require("./routes/createUser");
 const categoryRouter = require("./routes/category");
 const branchRouter = require("./routes/branch");
-const next = require("next");
 const session = require("express-session");
-const passport = require("./passport");
-const dev = process.env.Node_ENV !== "production";
-const app = next({ dev });
-const handle = app.getRequestHandler();
+const bcrypt = require("bcrypt");
+const LocalStrategy = require("passport-local").Strategy;
 
+const app = express();
 const port = process.env.PORT || 5000;
 
 const crypto = require("crypto");
+const User = require("./schemas/User");
 const secret = crypto.randomBytes(32).toString("hex");
 console.log("Generated Secret:", secret);
 
 // const categoryHandler = require("./routes/category");
 require("dotenv").config();
 
-const server = express();
-app.prepare().then(() => {
-  server.use(
-    session({
-      secret: process.env.SESSION_SECRET,
-      resave: false,
-      saveUninitialized: false,
-    })
-  );
-});
-server.use(cors());
-server.use(express.json());
-server.use(express.urlencoded({ extended: true }));
-server.use(passport.initialize());
-server.use(passport.session());
+app.use(cors());
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET,
+    resave: true,
+    saveUninitialized: true,
+  })
+);
+app.use(passport.initialize());
+app.use(passport.session());
 
 // const { MongoClient, ServerApiVersion } = require("mongodb");
 // mongoose.connect(
@@ -47,55 +46,59 @@ const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@clu
 mongoose.connect(uri);
 console.log(uri);
 
-server.use("/api/v1", router);
-server.use("/api/v1", categoryRouter); 
-server.use("/api/v1", menuRouter);
-server.use("/api/v1", popularItemsRouter);
-server.use("/api/v1", offerItemsRouter);
-server.use("/api/v1", cartRouter);
-server.use("/api/v1", branchRouter);
+app.use("/api/v1", router);
+app.use("/api/v1", categoryRouter);
+app.use("/api/v1", menuRouter);
+app.use("/api/v1", popularItemsRouter);
+app.use("/api/v1", offerItemsRouter);
+app.use("/api/v1", cartRouter);
+app.use("/api/v1", branchRouter);
+app.use("/api/v1/signup", createUserRouter);
 
 async function run() {
   try {
-    server.post(
-      `/api/v1/signup`,
-      async (req, res, next) => {
-        try {
-          const { email, password } = req.body;
-          // check if email already taken
-          const existingUser = await User.findOne({ email });
-          if (existingUser) {
-            return res.status(400).json({ message: "Email is already taken" });
-          }
+    passport.use(
+      new LocalStrategy({ usernameField: "email" }, (email, password, done) => {
+        User.findOne({ email: email }, (err, user) => {
+          if (err) return done(err);
 
-          // create a new user
-          const newUser = new User({ email });
-          newUser.setPassword(password);
-          await newUser.save();
+          if (!user) return done(null, false, { message: "Incorrect email." });
 
-          return next();
-        } catch (error) {
-          return next(error);
-        }
-      },
-      passport.authenticate("local", {
-        successRedirect: "/",
-        failureRedirect: "/api/v1/signup",
+          bcrypt.compare(password, user.password),
+            (err, res) => {
+              if (err) return done(err);
+
+              if (res === false)
+                return done(null, false, { message: "incorrect password." });
+
+              return done(null, user);
+            };
+        });
       })
     );
+
+    passport.serializeUser((user, done) => {
+      done(null, user.id);
+    });
+
+    passport.deserializeUser((id, done) => {
+      User.findById(id, (err, user) => {
+        done(err, user);
+      });
+    });
   } finally {
   }
 }
 
-server.all("*", (req, res) => {
+app.all("*", (req, res) => {
   return handle(req, res);
 });
 
-server.listen(port, () => {
-  console.log(`Server is running on ${port}`);
+app.listen(port, () => {
+  console.log(`Foodking Server is running on ${port}`);
 });
 
-server.get("/", (req, res) => {
+app.get("/", (req, res) => {
   res.send("Food king restaurant node server running");
 });
 run().catch(console.dir);
